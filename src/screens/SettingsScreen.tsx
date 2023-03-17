@@ -3,19 +3,13 @@ import { Button, View,StyleSheet,Text } from 'react-native';
 import { Navigation } from 'react-native-navigation';
 
 
-export default function SettingsScreen(props:any){
+export const SettingsScreen=({ navigation }:any,props:any)=>{
     const {mainRoot}= props
-    const styles = StyleSheet.create({
-        root: {
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: 'whitesmoke'
-        }
-      });
-      return (
-        <View style={styles.root}>
-          <Text>Settings Screen</Text>
-        </View>
-      );
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <Text>Settings Screen</Text>
+        <Button onPress={() => navigation.navigate('Login')} title="Go to login" />
+      </View>
+    );
   };
+  
