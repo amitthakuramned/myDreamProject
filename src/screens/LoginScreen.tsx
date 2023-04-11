@@ -14,16 +14,34 @@ import {
   View,
 } from "native-base";
 import { Navigation } from "react-native-navigation";
-import { gql, useMutation, useQuery } from "@apollo/client";
-import { LOGIN_USER } from "../service/loginService";
+import { gql, useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { GET_USER, LOGIN_USER } from "../service/loginService";
+import { storeDataLocaly, getDataFromLocal } from "../utility/localStorage";
+import { useDispatch, useSelector } from "react-redux";
+import { userDetails } from "../redux/action/authAction";
+import { userStateSelector } from "../redux/reducer/userReducer";
 
 export const LoginScreen = ({ navigation }: any, props: any) => {
   const { mainRoot } = props;
-  const [loginUser, { data, loading, error }] = useMutation(LOGIN_USER);
+  const dispatch = useDispatch();
   const [loginPayload, setLoginPayload] = useState({
     email: "",
     password: "",
   });
+  const [tokenn, setTokenn] = useState<any>([]);
+
+  const [loginUser] = useMutation(LOGIN_USER);
+  // const { data, loading, error } = useQuery<any>(GET_USER, {
+  //   variables: {
+  //     userEmail: "",
+  //   },
+  // });
+  const [getUserDetails,{ loading, data }] = useLazyQuery(GET_USER,{
+    variables: {
+      userEmail: "",
+    },
+  });
+
   const handleInputPassword = (value: any) => {
     setLoginPayload({ ...loginPayload, password: value });
   };
@@ -37,21 +55,18 @@ export const LoginScreen = ({ navigation }: any, props: any) => {
       variables: {
         userLogin: loginPayload,
       },
-      context: {
-        headers: {
-          "x-custom-component-add": "kkk-add",
-          "x-origin-server": "pure-react"
-        }
-      }
+    }).then(({ data, loading, error }: any) => {
+      setTokenn(data?.user?.token);
+      storeDataLocaly?.("token", data?.user?.token ? data?.user?.token : "");
+      setTimeout(()=>{
+        getUserDetails()
+      },500)
     });
   };
 
   useEffect(() => {
-    console.log("data>>>>>>>>", data?.user?.token,loading,error);
-    if(data?.user?.token){
-      navigation.navigate('Home')
-    }
-  }, [data,loading,error]);
+    dispatch<any>(userDetails(data))
+  }, [data]);
 
   return (
     <NativeBaseProvider>
